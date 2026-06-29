@@ -3,94 +3,236 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>메시지 초안 작성 AI Agent</title>
+  <title>Brity Draft — SK AI 메시지 초안 작성기</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/tabler-icons.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #f5f4f1; --surface: #fff;
-      --border: rgba(0,0,0,0.09); --border-md: rgba(0,0,0,0.16);
-      --text: #1a1a1a; --text-2: #555; --text-3: #999;
-      --purple: #534AB7; --purple-light: #EEEDFE; --purple-text: #3C3489;
-      --radius: 14px; --radius-sm: 9px;
+      --sk-red: #EA1917;
+      --sk-orange: #FF6C00;
+      --sk-grad: linear-gradient(135deg, #EA1917 0%, #FF6C00 100%);
+      --bg: #F7F7F7;
+      --surface: #FFFFFF;
+      --border: rgba(0,0,0,0.08);
+      --border-md: rgba(0,0,0,0.15);
+      --text: #1A1A1A;
+      --text-2: #555;
+      --text-3: #999;
+      --radius: 16px;
+      --radius-sm: 10px;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2.5rem 1rem; }
-    .wrap { max-width: 700px; margin: 0 auto; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-    .hero { margin-bottom: 2rem; }
-    .hero-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--purple-text); background: var(--purple-light); padding: 4px 10px; border-radius: 20px; margin-bottom: 12px; }
-    .hero h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+    /* 헤더 */
+    .topbar {
+      background: var(--sk-grad);
+      padding: 0 2rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-logo {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sk-mark {
+      width: 32px; height: 32px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 900; color: var(--sk-red);
+      letter-spacing: -0.5px;
+    }
+    .topbar-title { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .topbar-sub { color: rgba(255,255,255,0.7); font-size: 12px; }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+
+    /* 히어로 */
+    .hero { margin-bottom: 1.5rem; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--sk-red);
+      margin-bottom: 10px;
+    }
+    .hero h1 { font-size: 28px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; letter-spacing: -0.5px; }
+    .hero h1 span { background: var(--sk-grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .hero p { font-size: 14px; color: var(--text-2); line-height: 1.6; }
 
-    .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.4rem; margin-bottom: 1rem; }
+    /* 카드 */
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
 
-    .api-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1.2rem; padding-bottom: 1.2rem; border-bottom: 0.5px solid var(--border); }
-    .api-row label { font-size: 11px; font-weight: 700; color: var(--text-3); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em; }
-    .api-input { flex: 1; padding: 8px 11px; font-size: 13px; font-family: inherit; border: 0.5px solid var(--border-md); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); }
-    .api-input:focus { outline: none; border-color: var(--purple); }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; flex-shrink: 0; transition: background 0.2s; }
-    .dot.ok { background: #1D9E75; } .dot.err { background: #E24B4A; }
+    /* API 키 */
+    .api-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 1.3rem; padding-bottom: 1.3rem;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .api-label { font-size: 11px; font-weight: 700; color: var(--text-3); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em; }
+    .api-input { flex: 1; padding: 8px 12px; font-size: 13px; font-family: inherit; border: 0.5px solid var(--border-md); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); }
+    .api-input:focus { outline: none; border-color: var(--sk-red); }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; flex-shrink: 0; transition: background 0.2s; }
+    .dot.ok { background: #1DB954; }
+    .dot.err { background: var(--sk-red); }
 
-    .field { margin-bottom: 1.15rem; }
-    .field > label { display: block; font-size: 11px; font-weight: 700; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+    /* 섹션 레이블 */
+    .field { margin-bottom: 1.2rem; }
+    .field > label {
+      display: block; font-size: 11px; font-weight: 700;
+      color: var(--text-3); letter-spacing: 0.07em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
 
+    /* 칩 */
     .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 13px; font-size: 13px; border-radius: 20px; border: 0.5px solid var(--border-md); background: transparent; color: var(--text-2); cursor: pointer; transition: all 0.12s; font-family: inherit; }
-    .chip:hover { border-color: var(--purple); color: var(--purple); }
-    .chip.on { background: var(--purple-light); border-color: var(--purple); color: var(--purple-text); font-weight: 600; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 6px 14px; font-size: 13px; border-radius: 20px;
+      border: 0.5px solid var(--border-md);
+      background: transparent; color: var(--text-2);
+      cursor: pointer; transition: all 0.12s; font-family: inherit;
+    }
+    .chip:hover { border-color: var(--sk-red); color: var(--sk-red); }
+    .chip.on {
+      background: linear-gradient(135deg, #EA1917, #FF6C00);
+      border-color: transparent; color: #fff; font-weight: 600;
+    }
 
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    @media (max-width: 500px) { .row2 { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
 
-    textarea { width: 100%; min-height: 96px; padding: 10px 13px; font-size: 14px; font-family: inherit; line-height: 1.65; border: 0.5px solid var(--border-md); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); resize: vertical; }
-    textarea:focus { outline: none; border-color: var(--purple); }
+    textarea {
+      width: 100%; min-height: 96px; padding: 11px 13px;
+      font-size: 14px; font-family: inherit; line-height: 1.65;
+      border: 0.5px solid var(--border-md); border-radius: var(--radius-sm);
+      background: var(--bg); color: var(--text); resize: vertical;
+    }
+    textarea:focus { outline: none; border-color: var(--sk-red); }
     textarea::placeholder { color: var(--text-3); }
 
-    .attach-input { width: 100%; padding: 8px 11px; font-size: 13px; font-family: inherit; border: 0.5px solid var(--border-md); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); margin-top: 8px; }
-    .attach-input:focus { outline: none; border-color: var(--purple); }
-
-    .btn { width: 100%; padding: 13px; background: var(--purple); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; transition: opacity 0.15s; }
+    /* 버튼 */
+    .btn {
+      width: 100%; padding: 14px;
+      background: var(--sk-grad);
+      color: #fff; border: none; border-radius: var(--radius-sm);
+      font-size: 15px; font-weight: 700; font-family: inherit;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
+      transition: opacity 0.15s; box-shadow: 0 4px 14px rgba(234,25,23,0.3);
+    }
     .btn:hover { opacity: 0.88; }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
 
-    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.65s linear infinite; }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .draft { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); overflow: hidden; animation: up 0.3s ease both; margin-bottom: 10px; }
-    @keyframes up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-    .draft-head { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-bottom: 0.5px solid var(--border); }
-    .draft-left { display: flex; align-items: center; gap: 8px; }
-    .badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; }
-    .ba { background: #E1F5EE; color: #085041; }
-    .bb { background: #E6F1FB; color: #0C447C; }
-    .bc { background: #FAEEDA; color: #633806; }
-    .strat { font-size: 13px; font-weight: 600; }
-    .copy-btn { display: flex; align-items: center; gap: 4px; font-size: 12px; padding: 4px 10px; border: 0.5px solid var(--border-md); border-radius: var(--radius-sm); background: transparent; color: var(--text-2); cursor: pointer; font-family: inherit; }
-    .copy-btn:hover { background: var(--bg); }
-    .draft-body { padding: 15px 17px; }
-    .draft-text { font-size: 14px; line-height: 1.8; white-space: pre-wrap; }
-    .tradeoff { margin-top: 12px; padding: 9px 12px; background: var(--bg); border-radius: var(--radius-sm); font-size: 12px; color: var(--text-2); line-height: 1.6; }
-    .tradeoff b { color: var(--text); }
+    /* 결과 카드 */
+    .draft {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: up 0.3s ease both;
+      margin-bottom: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    @keyframes up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    .empty { text-align: center; padding: 3rem 1rem; border: 0.5px dashed var(--border-md); border-radius: var(--radius); color: var(--text-3); font-size: 13px; }
-    .empty i { font-size: 34px; display: block; margin-bottom: 10px; opacity: 0.3; }
-    .error-box { padding: 12px 14px; border-radius: var(--radius-sm); background: #fff0f0; color: #8b1a1a; font-size: 13px; line-height: 1.6; }
-    .footer { margin-top: 2rem; text-align: center; font-size: 12px; color: var(--text-3); }
+    .draft-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 0.5px solid var(--border);
+      background: #FAFAFA;
+    }
+    .draft-left { display: flex; align-items: center; gap: 8px; }
+    .badge {
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 12px; letter-spacing: 0.03em;
+    }
+    .ba { background: linear-gradient(135deg,#EA1917,#FF6C00); color: #fff; }
+    .bb { background: #FFF0EE; color: #EA1917; border: 0.5px solid #FFCCC9; }
+    .bc { background: #FFF5EE; color: #FF6C00; border: 0.5px solid #FFD9B3; }
+    .strat { font-size: 13px; font-weight: 700; color: var(--text); }
+
+    .copy-btn {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; padding: 5px 11px;
+      border: 0.5px solid var(--border-md); border-radius: var(--radius-sm);
+      background: transparent; color: var(--text-2);
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+    }
+    .copy-btn:hover { border-color: var(--sk-red); color: var(--sk-red); }
+
+    .draft-body { padding: 16px 18px; }
+    .draft-text { font-size: 14px; line-height: 1.85; white-space: pre-wrap; color: var(--text); }
+    .tradeoff {
+      margin-top: 12px; padding: 10px 13px;
+      background: #FFF8F7;
+      border-left: 3px solid var(--sk-orange);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 12px; color: var(--text-2); line-height: 1.6;
+    }
+    .tradeoff b { color: var(--sk-red); }
+
+    .empty {
+      text-align: center; padding: 3.5rem 1rem;
+      border: 0.5px dashed var(--border-md);
+      border-radius: var(--radius); color: var(--text-3); font-size: 13px;
+    }
+    .empty i { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.25; }
+
+    .error-box {
+      padding: 13px 15px; border-radius: var(--radius-sm);
+      background: #FFF0EE; color: #8b1a1a; font-size: 13px; line-height: 1.6;
+      border-left: 3px solid var(--sk-red);
+    }
+
+    .footer {
+      margin-top: 2.5rem; text-align: center;
+      font-size: 12px; color: var(--text-3); line-height: 1.8;
+    }
+    .footer strong { color: var(--sk-red); }
   </style>
 </head>
 <body>
+
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="sk-mark">SK</div>
+    <div>
+      <div class="topbar-title">Brity Draft</div>
+    </div>
+  </div>
+  <div class="topbar-sub">AI 메시지 초안 작성 에이전트</div>
+</div>
+
 <div class="wrap">
   <div class="hero">
-    <div class="hero-badge"><i class="ti ti-sparkles"></i> AI Agent</div>
-    <h1>메시지 초안 작성기</h1>
-    <p>상황을 설명하면 전략이 다른 초안 3가지를 AI가 생성합니다.</p>
+    <div class="hero-eyebrow"><i class="ti ti-sparkles"></i> SK AI Agent</div>
+    <h1>상황에 맞는 메시지,<br><span>AI가 3가지 전략으로</span> 써드립니다</h1>
+    <p>채널·상황·관계를 선택하고 상황을 설명하면 Gemini AI가 전략이 다른 초안 3가지를 즉시 생성합니다.</p>
   </div>
 
   <div class="card">
-
-
-    <div class="field">
-      <label>채널</label>
+<div class="field">
+      <label>채널 선택</label>
       <div class="chips" id="g-ch">
         <button class="chip on" data-v="이메일"><i class="ti ti-mail"></i>이메일</button>
         <button class="chip" data-v="슬랙"><i class="ti ti-brand-slack"></i>슬랙</button>
@@ -114,7 +256,7 @@
         </div>
       </div>
       <div class="field">
-        <label>관계</label>
+        <label>상대방 관계</label>
         <div class="chips" id="g-rel">
           <button class="chip on" data-v="상사">상사</button>
           <button class="chip" data-v="동료">동료</button>
@@ -130,22 +272,8 @@
       <textarea id="sit" placeholder="예: 팀장님께 마감을 3일 연장해달라고 부탁해야 해요. 어제 실수로 데이터를 잘못 분석해서 다시 해야 하는 상황이에요."></textarea>
     </div>
 
-    <div class="field">
-      <label><i class="ti ti-paperclip" style="font-size:11px;vertical-align:-1px"></i> 첨부파일 (선택)</label>
-      <div class="chips" id="g-attach">
-        <button class="chip on" data-v="">없음</button>
-        <button class="chip" data-v="보고서"><i class="ti ti-file-text"></i>보고서</button>
-        <button class="chip" data-v="견적서"><i class="ti ti-receipt"></i>견적서</button>
-        <button class="chip" data-v="계약서"><i class="ti ti-writing"></i>계약서</button>
-        <button class="chip" data-v="제안서"><i class="ti ti-bulb"></i>제안서</button>
-        <button class="chip" data-v="자료/데이터"><i class="ti ti-table"></i>자료/데이터</button>
-        <button class="chip" data-v="이미지/사진"><i class="ti ti-photo"></i>이미지/사진</button>
-      </div>
-      <input class="attach-input" id="attach-name" type="text" placeholder="파일명 (예: 2025_Q1_보고서.pdf) — 선택사항" />
-    </div>
-
     <button class="btn" id="gen-btn" onclick="generate()">
-      <i class="ti ti-sparkles"></i> 초안 3가지 만들기
+      <i class="ti ti-sparkles"></i> 초안 3가지 생성하기
     </button>
   </div>
 
@@ -156,12 +284,13 @@
     </div>
   </div>
 
-  <div class="footer">메시지 초안 작성 AI Agent · Powered by Google Gemini</div>
+  <div class="footer">
+    <strong>Brity Draft</strong> · SK AI Agent · Powered by Google Gemini
+  </div>
 </div>
 
 <script>
-  // 칩 선택
-  ['g-ch','g-type','g-rel','g-attach'].forEach(function(id) {
+  ['g-ch','g-type','g-rel'].forEach(function(id) {
     document.getElementById(id).querySelectorAll('.chip').forEach(function(c) {
       c.addEventListener('click', function() {
         document.getElementById(id).querySelectorAll('.chip').forEach(function(x){ x.classList.remove('on'); });
@@ -175,8 +304,8 @@
     return el ? el.dataset.v : '';
   }
 
-  const _s="2rffdt",_a="Z0V4NGs2VkhsenA2S1dzYlVs",_b="a2wzVThwYkRpWjdlZ2RYdW9u",_c="eEV1VkFjZks2TlI4YkEuUUE=";
-  const _k=atob(_a+_b+_c).split('').reverse().join('');
+  var _s="2rffdt",_a="Z0V4NGs2VkhsenA2S1dzYlVs",_b="a2wzVThwYkRpWjdlZ2RYdW9u",_c="eEV1VkFjZks2TlI4YkEuUUE=";
+  var _k=atob(_a+_b+_c).split('').reverse().join('');
 
   async function generate() {
     var apiKey = _k;
@@ -184,32 +313,23 @@
 
     if (!sit)    { document.getElementById('sit').focus(); return; }
 
-    var channel    = getVal('g-ch');
-    var type       = getVal('g-type');
-    var rel        = getVal('g-rel');
-    var attach     = getVal('g-attach');
-    var attachName = document.getElementById('attach-name').value.trim();
-
-    var attachInfo = '';
-    if (attach) {
-      attachInfo = '\n첨부파일: ' + attach + (attachName ? ' (' + attachName + ')' : '');
-    }
+    var channel = getVal('g-ch');
+    var type    = getVal('g-type');
+    var rel     = getVal('g-rel');
 
     var btn = document.getElementById('gen-btn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> AI가 작성 중...';
+    btn.innerHTML = '<div class="spinner"></div> AI가 분석 중...';
     document.getElementById('output').innerHTML = '';
 
-    var prompt = '당신은 메시지 작성 전문가입니다. 아래 상황에 맞는 메시지 초안을 3가지 전략으로 만들어주세요.\n\n'
+    var prompt = '당신은 직장인 커뮤니케이션 전문가입니다. 아래 상황에 맞는 메시지 초안을 3가지 전략으로 만들어주세요.\n\n'
       + '채널: ' + channel + '\n'
       + '상황 유형: ' + type + '\n'
       + '관계: ' + rel + '\n'
-      + '상황 설명: ' + sit
-      + attachInfo + '\n\n'
+      + '상황 설명: ' + sit + '\n\n'
       + '반드시 순수 JSON만 출력하세요. 코드블록 없이:\n'
-      + '{"drafts":[{"strategy":"전략명(10자이내)","text":"메시지초안","tradeoff":"장단점한줄"},{"strategy":"전략명","text":"메시지초안","tradeoff":"장단점한줄"},{"strategy":"전략명","text":"메시지초안","tradeoff":"장단점한줄"}]}\n\n'
-      + '규칙: ' + channel + '에 맞는 형식과 길이, 세 초안은 전략이 명확히 다르게 (단도직입/관계중시/설득 등), 완성된 문장으로.'
-      + (attach ? ' 첨부파일(' + attach + ')이 있으니 본문에 자연스럽게 첨부 언급을 포함하세요.' : '');
+      + '{"drafts":[{"strategy":"전략명(8자이내)","text":"메시지초안","tradeoff":"장단점한줄"},{"strategy":"전략명","text":"메시지초안","tradeoff":"장단점한줄"},{"strategy":"전략명","text":"메시지초안","tradeoff":"장단점한줄"}]}\n\n'
+      + '규칙: ' + channel + '에 맞는 형식과 길이, 세 초안은 전략이 명확히 다르게(단도직입/관계중시/설득형 등), 바로 쓸 수 있는 완성 문장으로.';
 
     try {
       var res = await fetch(
@@ -228,8 +348,6 @@
       if (!res.ok) throw new Error(data.error ? data.error.message : '알 수 없는 오류');
 
       var raw = data.candidates[0].content.parts[0].text;
-
-      // JSON 추출
       var clean = raw;
       var m = raw.match(/\{[\s\S]*\}/);
       if (m) clean = m[0];
@@ -262,11 +380,11 @@
         + '<span class="badge ' + badges[i] + '">초안 ' + labels[i] + '</span>'
         + '<span class="strat">' + d.strategy + '</span>'
         + '</div>'
-        + '<button class="copy-btn" onclick="cp(this,\'dt-' + i + '\')"><i class="ti ti-copy"></i>복사</button>'
+        + '<button class="copy-btn" onclick="cp(this,\'dt-' + i + '\')"><i class="ti ti-copy"></i> 복사</button>'
         + '</div>'
         + '<div class="draft-body">'
         + '<div class="draft-text" id="dt-' + i + '">' + d.text + '</div>'
-        + '<div class="tradeoff"><b>트레이드오프</b>&nbsp;&nbsp;' + d.tradeoff + '</div>'
+        + '<div class="tradeoff"><b>트레이드오프</b>&nbsp; ' + d.tradeoff + '</div>'
         + '</div>';
       out.appendChild(div);
     });
@@ -274,8 +392,8 @@
 
   function cp(btn, id) {
     navigator.clipboard.writeText(document.getElementById(id).innerText).then(function() {
-      btn.innerHTML = '<i class="ti ti-check"></i>완료';
-      setTimeout(function(){ btn.innerHTML = '<i class="ti ti-copy"></i>복사'; }, 1500);
+      btn.innerHTML = '<i class="ti ti-check"></i> 완료';
+      setTimeout(function(){ btn.innerHTML = '<i class="ti ti-copy"></i> 복사'; }, 1500);
     });
   }
 
